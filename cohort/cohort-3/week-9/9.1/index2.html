@@ -1,0 +1,40 @@
+<!-- // writing the code for count how react inside do work -->
+ <!DOCTYPE html>
+ <html lang="en">
+ <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+ </head>
+ <body>
+    <div id="buttonParent">
+    </div>
+    <script>
+        let state = {
+            count:0
+        }
+        function onButtonPress(){
+            state.count++;
+            buttonComponentReRender()
+        }
+        //this is what react does 
+        function buttonComponentReRender(){
+            document.getElementById("buttonParent").innerHTML = "";
+                const component  =   buttonComponent(state.count);
+               console.log(component)
+             document.getElementById("buttonParent").appendChild(component);
+    
+        }
+
+        function buttonComponent(count){
+            const button = document.createElement("button");
+            button.innerHTML = `counter ${count}`
+            button.setAttribute("onClick", `onButtonPress()`);
+            return button;
+        }
+        //<button onclick() = "onButtonPress">coutner 0</button>
+        buttonComponentReRender();
+    </script>
+
+ </body>
+ </html>

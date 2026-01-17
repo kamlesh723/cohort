@@ -1,0 +1,29 @@
+.hero {
+  display: flex;
+  justify-content: space-between;
+  padding: 60px 40px;
+  background-color: #f5f8fc;
+}
+
+.hero-left h1 {
+  font-size: 42px;
+  margin-bottom: 12px;
+}
+
+.hero-left span {
+  color: #0056d2;
+}
+
+.hero-left p {
+  font-size: 16px;
+  color: #555;
+}
+
+.hero-image-placeholder {
+  width: 360px;
+  height: 260px;
+  background: #ddd;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}

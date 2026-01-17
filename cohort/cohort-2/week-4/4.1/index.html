@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script>
+            let timeout = null;
+            function debouncePopulateDiv(){
+                //delay thee call to populatediv until i ahve nopt been called
+                //for 100ms/and i have been called atleast once
+                //if it been called again before 100ms then stop and start again the clock
+                    clearTimeout(timeout)
+             timeout =    setTimeout(function(){
+                    populateDiv()
+                },1000);      
+            }
+
+        function populateDiv(){
+            //debouncing , throtling
+          const element =   document.getElementById("finalSum");
+          const a= document.getElementById("first-number").value;
+          const b = document.getElementById("second-number").value;
+        //  element.innerHTML =parseInt(a)+parseInt(b);
+        // fetch
+        
+         fetch("http://localhost:8080/sum?a="+ a +"&b="+b)
+         .then(function(response){
+            console.log(response)
+            response.text()
+            .then(function(ans){
+                console.log(ans);
+                document.getElementById("finalSum").innerHTML=ans;
+            })
+         });
+
+        }
+    </script>
+</head>
+<body>
+    <input oninput=" debouncePopulateDiv()" id="first-number" type="text" placeholder="first-number"><br/>
+    <input oninput=" debouncePopulateDiv()"  id="second-number" type="text" placeholder="second-number"><br/>
+    <!-- <button onclick="populateDiv()">calculate sum</button> -->
+
+    <div id="finalSum"></div>
+</body>
+</html>

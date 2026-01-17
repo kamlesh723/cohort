@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Todos</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #a78bfa 0%, #c4b5fd 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            padding: 40px;
+            border-radius: 20px;
+            width: 600px;
+            max-width: 100%;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            color: #7c3aed;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .add-todo {
+            margin-bottom: 30px;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.9);
+            font-size: 16px;
+            box-sizing: border-box;
+            margin-bottom: 10px;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            background: #8b5cf6;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #7c3aed;
+        }
+
+        #todoList {
+            margin-top: 20px;
+        }
+
+        .todo-item {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .todo-item.completed {
+            text-decoration: line-through;
+            opacity: 0.6;
+            color: #7c3aed;
+        }
+
+        .todo-text {
+            flex: 1;
+            color: #7c3aed;
+            font-weight: 500;
+        }
+
+        .delete-btn {
+            background: transparent;
+            border: none;
+            color: #7c3aed;
+            font-size: 20px;
+            cursor: pointer;
+            padding: 0 10px;
+            width: auto;
+        }
+
+        .logout-section {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(124, 58, 237, 0.3);
+            color: #fbbf24;
+        }
+
+        .logout-section a {
+            color: #fbbf24;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .empty-state {
+            text-align: center;
+            color: #7c3aed;
+            padding: 40px;
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1>Your Todo List</h1>
+        
+        <div class="add-todo">
+            <input type="text" id="newTodo" placeholder="Add a new todo">
+            <button onclick="addTodo()">Add Todo</button>
+        </div>
+
+        <div id="todoList"></div>
+
+        <div class="logout-section">
+            Logged in successfully. <a href="#" onclick="logout()">Logout</a>
+        </div>
+    </div>
+
+    <script>
+        // Check if user is logged in when page loads
+        window.onload = function() {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                alert('Please login first!');
+                window.location.href = 'login.html';
+                return;
+            }
+            loadTodos();
+        };
+
+        // Load all todos from backend
+        async function loadTodos() {
+            const token = localStorage.getItem('token');
+            const todoList = document.getElementById('todoList');
+            
+            todoList.innerHTML = '<p class="empty-state">Loading...</p>';
+            
+            try {
+                // IMPORTANT: Send token in headers!
+                const response = await fetch('http://localhost:3000/user/todos', {
+                    headers: {
+                        'token': token
+                    }
+                });
+                
+                const data = await response.json();
+                const todos = data.todos || [];
+                
+                if (todos.length === 0) {
+                    todoList.innerHTML = '<p class="empty-state">No todos yet. Add one above!</p>';
+                    return;
+                }
+                
+                // Display todos
+                todoList.innerHTML = '';
+                todos.forEach(todo => {
+                    const div = document.createElement('div');
+                    div.className = `todo-item ${todo.done ? 'completed' : ''}`;
+                    div.innerHTML = `
+                        <span class="todo-text" onclick="toggleTodo('${todo._id}', ${!todo.done})">
+                            ${todo.title}
+                        </span>
+                        <button class="delete-btn" onclick="deleteTodo('${todo._id}')">✕</button>
+                    `;
+                    todoList.appendChild(div);
+                });
+                
+            } catch (error) {
+                console.error('Error loading todos:', error);
+                todoList.innerHTML = '<p class="empty-state">Failed to load todos</p>';
+            }
+        }
+
+        // Add new todo
+        async function addTodo() {
+            const token = localStorage.getItem('token');
+            const input = document.getElementById('newTodo');
+            const title = input.value.trim();
+            
+            if (!title) {
+                alert('Please enter a todo!');
+                return;
+            }
+            
+            try {
+                const response = await fetch('http://localhost:3000/todo', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'token': token
+                    },
+                    body: JSON.stringify({
+                        title: title,
+                        description: '',
+                        done: false
+                    })
+                });
+                
+                if (response.ok) {
+                    input.value = '';  // Clear input
+                    loadTodos();       // Reload list
+                }
+                
+            } catch (error) {
+                console.error('Error adding todo:', error);
+                alert('Failed to add todo');
+            }
+        }
+
+        // Toggle todo completion
+        async function toggleTodo(todoId, newStatus) {
+            const token = localStorage.getItem('token');
+            
+            try {
+                const response = await fetch(`http://localhost:3000/todo/${todoId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'token': token
+                    },
+                    body: JSON.stringify({
+                        done: newStatus
+                    })
+                });
+                
+                if (response.ok) {
+                    loadTodos();  // Reload to show updated state
+                }
+                
+            } catch (error) {
+                console.error('Error toggling todo:', error);
+            }
+        }
+
+        // Delete todo
+        async function deleteTodo(todoId) {
+            if (!confirm('Delete this todo?')) return;
+            
+            const token = localStorage.getItem('token');
+            
+            try {
+                const response = await fetch(`http://localhost:3000/todo/${todoId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'token': token
+                    }
+                });
+                
+                if (response.ok) {
+                    loadTodos();  // Reload list
+                }
+                
+            } catch (error) {
+                console.error('Error deleting todo:', error);
+            }
+        }
+
+        // Logout
+        function logout() {
+            if (confirm('Logout?')) {
+                localStorage.removeItem('token');
+                window.location.href = 'login.html';
+            }
+        }
+
+        // Allow Enter key to add todo
+        document.getElementById('newTodo').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                addTodo();
+            }
+        });
+    </script>
+</body>
+</html>

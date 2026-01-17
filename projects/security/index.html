@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Secure Auth Demo</title>
+  <style>
+    /* Modern Reset & Typography */
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    body {
+      font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      background-color: #f4f7f9;
+      color: #333;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    /* Container Card */
+    .container {
+      background: #ffffff;
+      padding: 2rem;
+      border-radius: 12px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+      width: 100%;
+      max-width: 400px;
+    }
+
+    h2 {
+      margin-bottom: 1.5rem;
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: #1a202c;
+      border-bottom: 2px solid #edf2f7;
+      padding-bottom: 0.5rem;
+    }
+
+    .section { margin-bottom: 2rem; }
+
+    /* Inputs & Buttons */
+    input {
+      width: 100%;
+      padding: 12px;
+      margin-bottom: 12px;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      font-size: 1rem;
+      transition: border-color 0.2s;
+    }
+
+    input:focus {
+      outline: none;
+      border-color: #4a90e2;
+      box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      background-color: #4a90e2;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+      margin-bottom: 10px;
+    }
+
+    button:hover { background-color: #357abd; }
+    button:active { transform: scale(0.98); }
+
+    /* Secondary actions */
+    .btn-secondary {
+      background-color: #edf2f7;
+      color: #4a5568;
+    }
+    .btn-secondary:hover { background-color: #e2e8f0; }
+
+    /* Output Area */
+    #output {
+      background: #1a202c;
+      color: #a0aec0;
+      padding: 1rem;
+      border-radius: 8px;
+      font-family: 'Fira Code', 'Courier New', monospace;
+      font-size: 0.85rem;
+      overflow-x: auto;
+      max-height: 200px;
+      margin-top: 1rem;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <div class="section">
+    <h2>Login</h2>
+    <input id="email" type="email" placeholder="Email Address" />
+    <input id="password" type="password" placeholder="Password" />
+    <button onclick="login()">Sign In</button>
+  </div>
+
+  <div class="section">
+    <h2>Account Actions</h2>
+    <button class="btn-secondary" onclick="profile()">View Profile</button>
+    <button class="btn-secondary" style="color: #e53e3e;" onclick="transfer()">Transfer Money</button>
+  </div>
+
+  <div class="section">
+    <h2>Server Response</h2>
+    <pre id="output">// Logs will appear here...</pre>
+  </div>
+</div>
+
+<script>
+  let csrfToken = null;
+
+  // Helper to update UI
+  function updateOutput(data) {
+    const output = document.getElementById('output');
+    output.textContent = JSON.stringify(data, null, 2);
+  }
+
+  async function login() {
+    try {
+      const res = await fetch("http://localhost:5000/login", {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: document.getElementById('email').value,
+          password: document.getElementById('password').value
+        })
+      });
+
+      const data = await res.json();
+      csrfToken = data.csrfToken;
+      updateOutput(data);
+    } catch (err) {
+      updateOutput({ error: "Failed to connect to server" });
+    }
+  }
+
+  async function profile() {
+    try {
+      const res = await fetch("http://localhost:5000/profile", {
+        credentials: "include"
+      });
+      const data = await res.json();
+      updateOutput(data);
+    } catch (err) {
+      updateOutput({ error: "Failed to fetch profile" });
+    }
+  }
+
+  async function transfer() {
+    try {
+      const res = await fetch("http://localhost:5000/transfer", {
+        method: "POST",
+        credentials: "include",
+        headers: {
+          "x-csrf-token": csrfToken
+        }
+      });
+      const data = await res.json();
+      updateOutput(data);
+    } catch (err) {
+      updateOutput({ error: "Transfer failed" });
+    }
+  }
+</script>
+
+</body>
+</html>

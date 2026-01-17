@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    
+</head>
+<body>
+    <div>
+        <input id="title" type="text" placeholder="title"><br/><br/>
+        <input id="description" type="text" placeholder="title"><br/><br/>
+        <div id="container">
+            
+        </div>
+    </div>
+    <script>
+
+        function createchild(title,description,id){
+               const child =  document.createElement("div");
+               const fgrandchild =  document.createElement("div");
+               fgrandchild.innerHTML = title;
+               const secondgrandchild = document.createElement("div");
+               secondgrandchild.innerHTML = description;
+               const thirdgrandchild=  document.createElement("button");
+               thirdgrandchild.innerHTML = "mark as done";
+               thirdgrandchild.setAttribute("onclick",`markAsDone(${id})`);
+               child.appendChild(fgrandchild);
+               child.appendChild(secondgrandchild);
+               child.appendChild(thirdgrandchild);
+               child.setAttribute("id",id);
+               return child;
+
+
+            }
+             function updatedomAccState(state){
+                const parent = document.getElementById("container");
+                parent.innerHTML="";
+                for(let i=0;i<state.length;++i){
+                    const child = createchild(state[i].title,state[i].description,state[i].id);
+                    parent.appendChild(child);
+                }
+       }
+            updatedomAccState([{
+                title:"go to gym",
+                description:"the timing is 5am-7am",
+                id:1
+            },{
+             title:"go to gym2",
+                description:"the timing is 5am-7am",
+                id:2
+            },
+
+
+        ])
+
+     let globalId = 1;
+        function addTodo(){
+            const title = document.getElementById("title").value;
+            const description = document.getElementById("description").value;
+            const parent  = document.getElementById("container")
+            //document.createElemnt
+
+            parent.appendChild(createchild(title,description,globalId++))
+
+            
+        }
+        //state will always be an array
+        //Every element of state would have a title,description and id
+        //
+           
+        
+ </script>
+</body>
+</html>
