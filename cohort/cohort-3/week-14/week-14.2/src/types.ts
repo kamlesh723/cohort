@@ -1,6 +1,6 @@
 type Employee = {
   name: string;
-  startDate: Date;
+  startDate: string;
 };
 
 type Manager = {
@@ -10,8 +10,14 @@ type Manager = {
 
 type TeamLead = Employee & Manager;
 
+
+let e: Employee = {
+  name:"kamlesh",
+  startDate:"01-02-2024"
+}
+
 const teamLead: TeamLead = {
   name: "Kamlesh",
-  startDate: new Date(),
+  startDate: "01-11-22",
   department: "Software developer"
 };
